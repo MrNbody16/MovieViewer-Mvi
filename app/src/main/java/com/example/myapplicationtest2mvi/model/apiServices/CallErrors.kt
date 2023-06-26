@@ -6,4 +6,6 @@ sealed class CallErrors {
     object ErrorServer : CallErrors()
     data class ErrorException(val throwable : Throwable) : CallErrors()
 
+    object CallerIsNull : CallErrors()
+
 }

@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">My ApplicationTest2 MVI</string>
+    <string name="app_name">Popular Movies-MVI</string>
+    <string name="error_empty_data">Empty data</string>
+    <string name="error_server_error">Server error</string>
+    <string name="error_exception">Error loading data</string>
+    <string name="apiKey">454af0804bc287cc0a0069cf6c442868</string>
+    <string name="nullApisRetro">Retrofit Client is null</string>
+
+    <string name="movieListPageTitle">Popular Movies</string>
+
 </resources>

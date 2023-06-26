@@ -11,9 +11,9 @@ import java.io.IOException
  * This method watches and retries api requests .
  * when procedure fails it checks attempts count and the cause of failure
  * then it might retry or just update state with an error
-* */
-fun <T:Any> Flow<Result<T>>.applyCommonSideEffects() =
-    retryWhen { cause , attempt ->
+ * */
+fun Flow<Result>.applyCommonSideEffects(type: Result) =
+    retryWhen { cause, attempt ->
         when {
             (cause is IOException && attempt < ApiServicesUtils.MAX_RETIRES) -> {
                 delay(ApiServicesUtils.getBackOffDelay(attempt))
@@ -24,7 +24,17 @@ fun <T:Any> Flow<Result<T>>.applyCommonSideEffects() =
             }
         }
     }.onStart {
-        emit(Result.Loading)
+        emit(
+            if (type is MovieListResult) {
+                MovieListResult.Loading
+            } else MovieDetailsResult.Loading
+        )
     }.catch {
-        emit(Result.Error(CallErrors.ErrorException(it)))
+        emit(
+            if (type is MovieListResult) {
+                MovieListResult.Exception(CallErrors.ErrorException(it))
+            } else MovieDetailsResult.Exception(CallErrors.ErrorException(it))
+        )
     }
+
+
