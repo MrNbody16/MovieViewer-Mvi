@@ -53,7 +53,8 @@ class MovieListFragment : BaseFragment(), MovieListItemSelector {
 
     private val errorSets: MutableSet<Int> = mutableSetOf()
 
-    private var firstBoot = true
+    private var totalPages = 0
+    private var onPageReopenStatChecker = false
 
     //declaring this property in here might be a bad design but for now i don't have any ideas
     private var configHolder: String = ""
@@ -96,7 +97,20 @@ class MovieListFragment : BaseFragment(), MovieListItemSelector {
         lifecycleScope.launch {
             viewModel.state.collect {
                 Log.i(Constants.TAG, "MainState : $it")
-                updateMainUiDetails(it)
+                if (!binding.nextPage.isEnabled)
+                    binding.nextPage.isEnabled = true
+                if (!binding.previousPage.isEnabled)
+                    binding.previousPage.isEnabled = true
+                if (onPageReopenStatChecker) {
+                    onPageReopenStatChecker = false
+                    adapter.setMovieList(MovieListResponse())
+                    viewModel.onPageReopenResetState(
+                        MovieListViewState.DataISLoaded(viewModel.movieListResponseHolder()),
+                        MovieListViewState.DataISLoaded(viewModel.configResponseHolder()),
+                        MovieListViewState.DataISLoaded(viewModel.genreResponseHolder())
+                    )
+                } else
+                    updateMainUiDetails(it)
             }
 
 
@@ -123,6 +137,26 @@ class MovieListFragment : BaseFragment(), MovieListItemSelector {
         }
 
         initData()
+
+        binding.nextPage.setOnClickListener {
+            (viewModel.pageCounter.value).let { value ->
+                viewModel.changePage(value + 1)
+                it.isEnabled = false
+                lifecycleScope.launch {
+                    viewModel.pageCounter.emit(value + 1)
+                }
+            }
+        }
+
+        binding.previousPage.setOnClickListener {
+            (viewModel.pageCounter.value).let { value ->
+                viewModel.changePage(value - 1)
+                it.isEnabled = false
+                lifecycleScope.launch {
+                    viewModel.pageCounter.emit(value - 1)
+                }
+            }
+        }
 
         lifecycleScope.launch(Dispatchers.IO) {
             while (true) {
@@ -203,22 +237,35 @@ class MovieListFragment : BaseFragment(), MovieListItemSelector {
                 adapter.setMovieList(MovieListResponse())
             }
 
+
+            is MovieListViewState.LoadingNewPage -> {
+                binding.loadingIndicator.visibility = View.VISIBLE
+                binding.pageCounter.text = "${viewModel.pageCounter.value} / $totalPages"
+                adapter.setMovieList(MovieListResponse())
+            }
+
             is MovieListViewState.DataISLoaded<*> -> {
                 if (state.data is Go2DetailsHolder) {
+                    onPageReopenStatChecker = true
                     val bundle = Bundle().also {
                         it.putInt("movieId", state.data.movieId ?: 0)
                         it.putString("config", configHolder)
                     }
                     findNavController().navigate(R.id.list2Detials, bundle, NavOpt.build())
                 } else {
+                    /*if (onPageReopenStatChecker) {
+                        onPageReopenStatChecker = false
+                    } else {*/
                     with(state.data as MovieListResponse) {
                         binding.loadingIndicator.visibility = View.GONE
                         binding.pageCounterLinear.visibility = View.VISIBLE
                         binding.movieListRecycler.visibility = View.VISIBLE
                         Log.i(Constants.TAG, "UpdatingMainUiDetails : $this")
+                        this@MovieListFragment.totalPages = this.total_pages ?: 0
                         binding.pageCounter.text =
                             "${viewModel.pageCounter.value.toString()} / ${this.total_pages}"
                         adapter.setMovieList(this)
+//                        }
                     }
                 }
             }

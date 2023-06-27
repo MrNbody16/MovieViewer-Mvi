@@ -21,7 +21,7 @@ class MovieDetailsViewModel(private val movieDetailsHelper : MovieDetailsFetchHe
             when (action) {
                 is MovieDetailsActions.LoadMovieDetails -> {
                     movieDetailsHelper.getDetails(action.movieId).collect{
-                        mState.emit((it as MovieDetailsResult).reduce())
+                        _mState.emit((it as MovieDetailsResult).reduce())
                     }
                 }
             }

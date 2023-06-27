@@ -13,10 +13,10 @@ import com.example.myapplicationtest2mvi.ui.viewstate.ViewState
 
 abstract class BaseViewModel<INTENT : ViewIntents , ACTION : ViewAction , STATE : ViewState>() : ViewModel(), IViewModel<STATE , INTENT> {
 
-    protected val mState = MutableStateFlow<STATE?>(null)
+    protected val _mState = MutableStateFlow<STATE?>(null)
     override val state: StateFlow<STATE?>
         get() {
-            return mState
+            return _mState
         }
 
     fun runOnBack(block: suspend CoroutineScope.() -> Unit) {

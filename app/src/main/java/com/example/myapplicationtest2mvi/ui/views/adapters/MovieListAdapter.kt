@@ -40,19 +40,24 @@ class MovieListAdapter(
 
     fun setMovieList(movieList: MovieListResponse?) {
         this.movieList = movieList
-        Log.i(com.example.myapplicationtest2mvi.utils.Constants.TAG , "MovieList received : $movieList")
+        Log.i(
+            com.example.myapplicationtest2mvi.utils.Constants.TAG,
+            "MovieList received : $movieList"
+        )
         notifyDataSetChanged()
     }
 
+    fun getMovieList(): MovieListResponse? = movieList
+
     fun setConfiguration(config: ConfigurationResponse?) {
         this.configs = config
-        Log.i(com.example.myapplicationtest2mvi.utils.Constants.TAG , "Config received : $config")
+        Log.i(com.example.myapplicationtest2mvi.utils.Constants.TAG, "Config received : $config")
         notifyDataSetChanged()
     }
 
     fun setGenresList(genreList: HashMap<Int, String>?) {
         this.genreList = genreList
-        Log.i(com.example.myapplicationtest2mvi.utils.Constants.TAG , "Genres received : $genreList")
+        Log.i(com.example.myapplicationtest2mvi.utils.Constants.TAG, "Genres received : $genreList")
         notifyDataSetChanged()
     }
 
@@ -78,10 +83,11 @@ class MovieListAdapter(
                 binding.releaseDate.text = this?.release_date ?: ""
                 binding.movieLanguageTxt.text = this?.original_language ?: ""
                 if (configs != null) {
-                    val x = (configs?.imagesConfig?.base_url + configs?.imagesConfig?.backdrop_sizes?.get(
-                        1
-                    ) + this?.backdrop_path)
-                    Log.i(com.example.myapplicationtest2mvi.utils.Constants.TAG , "Log Url : $x")
+                    val x =
+                        (configs?.imagesConfig?.base_url + configs?.imagesConfig?.backdrop_sizes?.get(
+                            1
+                        ) + this?.backdrop_path)
+                    Log.i(com.example.myapplicationtest2mvi.utils.Constants.TAG, "Log Url : $x")
                     Glide.with(context)
                         .load(
                             x

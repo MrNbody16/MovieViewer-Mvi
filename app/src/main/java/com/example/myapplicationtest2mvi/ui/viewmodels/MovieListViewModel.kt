@@ -8,10 +8,12 @@ import com.example.myapplicationtest2mvi.ui.viewactions.MovieListActions
 import com.example.myapplicationtest2mvi.ui.viewintents.MovieListViewIntent
 import com.example.myapplicationtest2mvi.ui.viewstate.MovieListViewState
 import com.example.myapplicationtest2mvi.ui.viewstate.ViewState
+import com.mr_nbody16.moviewviewer.models.ConfigurationResponse
+import com.mr_nbody16.moviewviewer.models.ImagesConfig
+import com.mr_nbody16.moviewviewer.models.MovieListResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
@@ -34,10 +36,23 @@ class MovieListViewModel(private val movieListHelper: MovieListFetchHelperImp) :
 
     val pageCounter = MutableStateFlow<Int>(1)
 
+    private var movieListResponseHolder = MovieListResponse()
+    private var configResponseHolder = ConfigurationResponse(listOf(), ImagesConfig())
+    private var genreResponseHolder = hashMapOf<Int, String>()
+
+    fun movieListResponseHolder() = movieListResponseHolder
+    fun configResponseHolder() = configResponseHolder
+    fun genreResponseHolder() = genreResponseHolder
+
     override fun intentToAction(intent: MovieListViewIntent): MovieListActions {
         return when (intent) {
             is MovieListViewIntent.LoadAllData -> MovieListActions.LoadingAllMovies(intent.page)
-            is MovieListViewIntent.Go2DetailsIntent -> MovieListActions.Go2Details(Go2DetailsHolder(intent.movieId))
+            is MovieListViewIntent.Go2DetailsIntent -> MovieListActions.Go2Details(
+                Go2DetailsHolder(
+                    intent.movieId
+                )
+            )
+
             is MovieListViewIntent.LoadConfig -> MovieListActions.LoadConfig
             is MovieListViewIntent.LoadGenres -> MovieListActions.LoadGenres
             is MovieListViewIntent.LoadPage -> MovieListActions.LoadPage(intent.page)
@@ -51,16 +66,53 @@ class MovieListViewModel(private val movieListHelper: MovieListFetchHelperImp) :
 
                     viewModelScope.launch(Dispatchers.IO) {
                         movieListHelper.getConfiguration().collect {
-                            _mConfigState.emit((it as MovieListResult).reduce())
+                            (it as MovieListResult).reduce().let { movieListState ->
+                                when (movieListState) {
+                                    is MovieListViewState.DataISLoaded<*> -> {
+                                        configResponseHolder =
+                                            movieListState.data as ConfigurationResponse
+                                    }
+
+                                    else -> {
+                                        configResponseHolder =
+                                            ConfigurationResponse(listOf(), ImagesConfig())
+                                    }
+                                }
+                                _mConfigState.emit(movieListState)
+                            }
                         }
                     }
                     viewModelScope.launch(Dispatchers.IO) {}
                     movieListHelper.getGenres().collect {
-                        _mGenresState.emit((it as MovieListResult).reduce())
+                        (it as MovieListResult).reduce().let { movieListState ->
+                            when (movieListState) {
+                                is MovieListViewState.DataISLoaded<*> -> {
+                                    genreResponseHolder =
+                                        movieListState.data as HashMap<Int, String>
+                                }
+
+                                else -> {
+                                    genreResponseHolder = hashMapOf()
+                                }
+                            }
+                            _mGenresState.emit(movieListState)
+                        }
                     }
                     viewModelScope.launch(Dispatchers.IO) {
                         movieListHelper.getMovieList(action.page).collect {
-                            mState.emit((it as MovieListResult).reduce())
+                            (it as MovieListResult).reduce().let { movieListState ->
+                                when (movieListState) {
+                                    is MovieListViewState.DataISLoaded<*> -> {
+                                        movieListResponseHolder =
+                                            movieListState.data as MovieListResponse
+                                    }
+
+                                    else -> {
+                                        movieListResponseHolder = MovieListResponse()
+                                    }
+                                }
+                                _mState.emit(movieListState)
+                            }
                         }
                     }
                 }
@@ -79,12 +131,12 @@ class MovieListViewModel(private val movieListHelper: MovieListFetchHelperImp) :
 
                 is MovieListActions.LoadPage -> {
                     movieListHelper.getMovieList(action.page).collect {
-                        mState.emit((it as MovieListResult).reduce())
+                        _mState.emit((it as MovieListResult).reduce())
                     }
                 }
 
                 is MovieListActions.Go2Details ->
-                    mState.emit(MovieListViewState.DataISLoaded(action.data))
+                    _mState.emit(MovieListViewState.DataISLoaded(action.data))
             }
         }
     }
@@ -92,7 +144,15 @@ class MovieListViewModel(private val movieListHelper: MovieListFetchHelperImp) :
 
     fun changePage(newPage: Int) {
         viewModelScope.launch {
-            dispatchIntent(MovieListViewIntent.LoadAllData(newPage))
+            dispatchIntent(MovieListViewIntent.LoadPage(newPage))
+        }
+    }
+
+    fun onPageReopenResetState(movieListState: MovieListViewState , configState : MovieListViewState , genreState : MovieListViewState ) {
+        viewModelScope.launch {
+            _mState.emit(movieListState)
+            _mGenresState.emit(genreState)
+            _mConfigState.emit(configState)
         }
     }
 
