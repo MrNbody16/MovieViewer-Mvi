@@ -4,9 +4,8 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.myapplicationtest2mvi.R
 import com.example.myapplicationtest2mvi.model.apiServices.CallErrors
-import com.example.myapplicationtest2mvi.ui.views.fragments.BaseFragment
+import com.mr_nbody16_movieViwer_mvi.R
 import kotlin.reflect.KClass
 
 

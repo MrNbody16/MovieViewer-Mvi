@@ -12,7 +12,7 @@ ext {
 }
 
 android {
-    namespace 'com.example.myapplicationtest2mvi'
+    namespace 'com.mr_nbody16_movieViwer_mvi'
     compileSdk 33
 
     defaultConfig {

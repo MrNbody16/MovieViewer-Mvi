@@ -77,14 +77,14 @@
         tools:listitem="@layout/movie_list_item_model"
         android:layout_marginVertical="4dp"
         android:layoutAnimation="@anim/layout_animation_recycler"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintBottom_toTopOf="@+id/pageCounterLinear"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
 
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/pageCounterLinear"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -101,7 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="@dimen/defaultMargin"
-            android:src="@drawable/arrow_back"
+            android:src="@drawable/baseline_arrow_back_ios_new_24"
             app:tint="@color/colorPrimary" />
 
         <TextView
