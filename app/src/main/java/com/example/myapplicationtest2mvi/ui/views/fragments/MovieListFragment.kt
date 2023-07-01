@@ -133,7 +133,8 @@ class MovieListFragment : BaseFragment(), MovieListItemSelector {
         }
 
         binding.warningIcon.setOnClickListener {
-            showWarningErrors()
+//            if (errorSets.isNotEmpty())
+                showWarningErrors()
         }
 
         initData()

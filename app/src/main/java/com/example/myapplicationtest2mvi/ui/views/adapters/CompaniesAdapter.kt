@@ -58,7 +58,7 @@ class CompaniesAdapter(private val context: Context) :
                         configuration?.imagesConfig?.base_url +
                                 configuration?.imagesConfig?.logo_sizes?.get(4) + this?.logo_path
                     ).placeholder(loadingIndicator)
-                    .error(R.drawable.warning_amber)
+                    .error(R.drawable.warning)
                     .into(binding.companyImage)
                 binding.companyName.text = this?.name?:""
             }
